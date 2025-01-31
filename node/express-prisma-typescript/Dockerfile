@@ -34,6 +34,7 @@ CMD yarn prod
 
 # Development runtime
 FROM node:18-alpine AS dev
+RUN apk add --no-cache openssl
 
 WORKDIR /app
 

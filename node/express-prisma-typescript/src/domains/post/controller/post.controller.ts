@@ -1,10 +1,8 @@
 import { Request, Response, Router } from 'express'
 import HttpStatus from 'http-status'
-// express-async-errors is a module that handles async errors in express, don't forget import it in your new controllers
 import 'express-async-errors'
 
 import { db, BodyValidation } from '@utils'
-
 import { PostRepositoryImpl } from '../repository'
 import { PostService, PostServiceImpl } from '../service'
 import { CreatePostInputDTO } from '../dto'
@@ -28,6 +26,24 @@ postRouter.get('/:postId', async (req: Request, res: Response) => {
   const { postId } = req.params
 
   const post = await service.getPost(userId, postId)
+  const author = await db.user.findUnique({
+    where: { id : post.authorId },
+    select: { is_private: true, followers: true },
+  })
+
+  if (author?.is_private) {
+    // Check if the user is following the author
+    const isFollowing = await db.follow.findFirst({
+      where: {
+        followerId: userId,
+        followedId: post.authorId,
+     },
+    })
+
+    if(!isFollowing) {
+      return res.status(HttpStatus.NOT_FOUND).json({ message: 'Post not found or private account' })
+    }
+  }
 
   return res.status(HttpStatus.OK).json(post)
 })
@@ -37,6 +53,26 @@ postRouter.get('/by_user/:userId', async (req: Request, res: Response) => {
   const { userId: authorId } = req.params
 
   const posts = await service.getPostsByAuthor(userId, authorId)
+  const author = await db.user.findUnique({
+    where: { id: authorId },
+    select: { is_private: true, followers: true },
+  })
+
+  if(author?.is_private) {
+    // Check if the user is following the author
+    const isFollowing = await db.follow.findFirst({
+      where: {
+        followerId: userId,
+        followedId: authorId,
+      },
+    })
+
+    if(!isFollowing) {
+      return res.status(HttpStatus.NOT_FOUND).json({ message: 'Post not found or private account' })
+
+    }
+  }
+
 
   return res.status(HttpStatus.OK).json(posts)
 })

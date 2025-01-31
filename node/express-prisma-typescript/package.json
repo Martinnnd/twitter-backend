@@ -26,7 +26,11 @@
     "jsonwebtoken": "^9.0.0",
     "method-override": "^3.0.0",
     "morgan": "^1.10.0",
-    "signale": "^1.4.0"
+    "signale": "^1.4.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui": "^5.18.3",
+    "swagger-ui-dist": "^5.18.3",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
@@ -38,6 +42,8 @@
     "@types/morgan": "^1.9.4",
     "@types/node": "^18.11.18",
     "@types/signale": "^1.4.4",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui": "^3.52.4",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.49.0",
     "eslint-config-standard-with-typescript": "^31.0.0",
