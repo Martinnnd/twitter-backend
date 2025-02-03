@@ -23,11 +23,12 @@ model User {
   name       String? @db.VarChar(35) // Limit display name to 35 characters
   email      String  @unique // Unique constraint
   password   String
-  is_private Boolean @default(false)
+  is_private Boolean @default(true)
+  
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  deletedAt DateTime? // Optional value
+  deletedAt DateTime? // Optional value 
 
   posts     Post[]
   follows   Follow[] @relation(name: "follows")

@@ -12,6 +12,41 @@ export const postRouter = Router()
 // Use dependency injection
 const service: PostService = new PostServiceImpl(new PostRepositoryImpl(db))
 
+/**
+ * @swagger
+ * /api/post:
+ *   get:
+ *     security:
+ *       - bearer: []
+ *     summary: Get latest posts
+ *     tags: [Post]
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: The number of posts to return
+ *       - in: query
+ *         name: before
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: The cursor to the previous page
+ *       - in: query
+ *         name: after
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: The cursor to the next page
+ *     responses:
+ *       200:
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Post'
+ */
 postRouter.get('/', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
   const { limit, before, after } = req.query as Record<string, string>
@@ -21,6 +56,41 @@ postRouter.get('/', async (req: Request, res: Response) => {
   return res.status(HttpStatus.OK).json(posts)
 })
 
+/**
+ * @swagger
+ * /api/postId:
+ *   get:
+ *     security:
+ *       - bearer: []
+ *     summary: Get latest posts
+ *     tags: [Post]
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: The number of posts to return
+ *       - in: query
+ *         name: before
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: The cursor to the previous page
+ *       - in: query
+ *         name: after
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: The cursor to the next page
+ *     responses:
+ *       200:
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Post'
+ */
 postRouter.get('/:postId', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
   const { postId } = req.params

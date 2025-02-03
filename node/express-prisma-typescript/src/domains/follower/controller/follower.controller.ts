@@ -1,5 +1,7 @@
-import { Request, Response } from "express";
+import { Request, Response, Router } from "express";
 import { FollowerService } from "../service/follower.service";
+
+export const followerRouter = Router()
 
 export class FollowerController {
   private followerService: FollowerService;

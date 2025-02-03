@@ -2,6 +2,9 @@ import express from 'express'
 import morgan from 'morgan'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
+import swaggerUi from 'swagger-ui-express'
+import { swaggerDocs } from '@swagger'
+
 
 import { Constants, NodeEnv, Logger } from '@utils'
 import { router } from '@router'
@@ -29,6 +32,8 @@ app.use(
 app.use('/api', router)
 
 app.use(ErrorHandling)
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs))
 
 app.listen(Constants.PORT, () => {
   Logger.info(`Server listening on port ${Constants.PORT}`)

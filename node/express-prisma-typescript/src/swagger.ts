@@ -9,13 +9,10 @@ const swaggerOptions = {
       description: 'This is the API documentation for our project.',
     },
   },
-  apis: ['./src/router/*.ts'], 
+  apis: ['./src/domains/post/controller/*.ts', './src/domains/user/controller/*.ts'], 
 };
 
+export const swaggerDocs = swaggerJsDoc(swaggerOptions);
 
-const swaggerDocs = swaggerJsDoc(swaggerOptions);
-
-// Exporta como exportaciones nombradas
-export { swaggerDocs, swaggerOptions};
 
 
