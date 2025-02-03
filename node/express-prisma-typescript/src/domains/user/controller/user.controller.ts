@@ -45,12 +45,18 @@ const service: UserService = new UserServiceImpl(new UserRepositoryImpl(db))
  *                 $ref: '#/components/schemas/User'
  */
 userRouter.get('/', async (req: Request, res: Response) => {
+  // const { userId } = res.locals.context
+  // const { limit, skip } = req.query as Record<string, string>
+
+  // const users = await service.getUserRecommendations(userId, { limit: Number(limit), skip: Number(skip) })
+
+  // return res.status(HttpStatus.OK).json(users)
   const { userId } = res.locals.context
   const { limit, skip } = req.query as Record<string, string>
 
-  const users = await service.getUserRecommendations(userId, { limit: Number(limit), skip: Number(skip) })
+  const usersView = await service.getUserRecommendations(userId, { limit: Number(limit), skip: Number(skip) })
 
-  return res.status(HttpStatus.OK).json(users)
+  return res.status(HttpStatus.OK).json(usersView)  
 })
 
 /**
@@ -72,9 +78,12 @@ userRouter.get('/', async (req: Request, res: Response) => {
 userRouter.get('/me', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
 
-  const user = await service.getUser(userId)
+  // const user = await service.getUser(userId)
 
-  return res.status(HttpStatus.OK).json(user)
+  // return res.status(HttpStatus.OK).json(user)
+  const userView = await service.getUser(userId)
+
+  return res.status(HttpStatus.OK).json(userView) 
 })
 
 /**
@@ -106,18 +115,7 @@ userRouter.get('/:userId', async (req: Request, res: Response) => {
   return res.status(HttpStatus.OK).json(user)
 })
 
-/**
- * @swagger
- * /api/user:
- *   delete:
- *     security:
- *       - bearer: []
- *     summary: Delete current user
- *     tags: [User]
- *     responses:
- *       200:
- *         description: User successfully deleted
- */
+
 userRouter.delete('/', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
 
