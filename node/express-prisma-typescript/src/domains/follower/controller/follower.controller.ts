@@ -1,34 +1,82 @@
-import { Request, Response, Router } from "express";
-import { FollowerService } from "../service/follower.service";
+import { Request, Response, Router } from 'express'
+import HttpStatus from 'http-status'
+import 'express-async-errors'
+
+import { db } from '@utils'
+import { FollowerRepositoryImpl } from '../repository'
+import { FollowerService, FollowerServiceImpl } from '../service'
 
 export const followerRouter = Router()
 
-export class FollowerController {
-  private followerService: FollowerService;
+// Use dependency injection
+const service: FollowerService = new FollowerServiceImpl(new FollowerRepositoryImpl(db))
 
-  constructor() {
-    this.followerService = new FollowerService();
+/**
+ * @swagger
+ * /api/follower/follow/{userId}:
+ *   post:
+ *     security:
+ *       - bearer: []
+ *     summary: Follow a user
+ *     tags: [Follower]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The user ID to follow
+ *     responses:
+ *       200:
+ *         description: Followed successfully
+ *       404:
+ *         description: User not found or already following
+ */
+followerRouter.post('/follow/:userId', async (req: Request, res: Response) => {
+  const { userId } = res.locals.context
+  const { userId: targetUserId } = req.params
+
+  // Llamada al servicio para seguir al usuario
+  const result = await service.followUser(userId, targetUserId)
+
+  if (!result) {
+    return res.status(HttpStatus.NOT_FOUND).json({ message: 'User not found or already following' })
   }
 
-  async followUser(req: Request, res: Response) {
-    try {
-      const { user_id } = req.params;
-      const { userId } = req.body; // ID del usuario autenticado
-      await this.followerService.followUser(userId, user_id);
-      res.status(200).json({ message: "User followed successfully" });
-    } catch (error) {
-      res.status(500).json({ error: "Error following user" });
-    }
+  return res.status(HttpStatus.OK).json({ message: 'Followed successfully' })
+})
+
+/**
+ * @swagger
+ * /api/follower/unfollow/{userId}:
+ *   post:
+ *     security:
+ *       - bearer: []
+ *     summary: Unfollow a user
+ *     tags: [Follower]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The user ID to unfollow
+ *     responses:
+ *       200:
+ *         description: Unfollowed successfully
+ *       404:
+ *         description: User not found or not following
+ */
+followerRouter.post('/unfollow/:userId', async (req: Request, res: Response) => {
+  const { userId } = res.locals.context
+  const { userId: targetUserId } = req.params
+
+  // Llamada al servicio para dejar de seguir al usuario
+  const result = await service.unfollowUser(userId, targetUserId)
+
+  if (!result) {
+    return res.status(HttpStatus.NOT_FOUND).json({ message: 'User not found or not following' })
   }
 
-  async unfollowUser(req: Request, res: Response) {
-    try {
-      const { user_id } = req.params;
-      const { userId } = req.body;
-      await this.followerService.unfollowUser(userId, user_id);
-      res.status(200).json({ message: "User unfollowed successfully" });
-    } catch (error) {
-      res.status(500).json({ error: "Error unfollowing user" });
-    }
-  }
-}
+  return res.status(HttpStatus.OK).json({ message: 'Unfollowed successfully' })
+})

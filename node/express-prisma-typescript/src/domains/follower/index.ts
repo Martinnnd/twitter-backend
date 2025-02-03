@@ -1,1 +1,1 @@
-export * from './controller/follower.controller';
+export * from './controller'

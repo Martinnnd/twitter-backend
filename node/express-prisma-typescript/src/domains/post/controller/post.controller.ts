@@ -58,31 +58,19 @@ postRouter.get('/', async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /api/postId:
+ * /api/post/{postId}:
  *   get:
  *     security:
  *       - bearer: []
- *     summary: Get latest posts
+ *     summary: Get a specific post by ID
  *     tags: [Post]
  *     parameters:
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *         required: false
- *         description: The number of posts to return
- *       - in: query
- *         name: before
+ *       - in: path
+ *         name: postId
+ *         required: true
  *         schema:
  *           type: string
- *         required: false
- *         description: The cursor to the previous page
- *       - in: query
- *         name: after
- *         schema:
- *           type: string
- *         required: false
- *         description: The cursor to the next page
+ *         description: The post ID
  *     responses:
  *       200:
  *         description: OK
@@ -90,6 +78,8 @@ postRouter.get('/', async (req: Request, res: Response) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Post'
+ *       404:
+ *         description: Post not found or private account
  */
 postRouter.get('/:postId', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
@@ -98,26 +88,43 @@ postRouter.get('/:postId', async (req: Request, res: Response) => {
   const post = await service.getPost(userId, postId)
   const author = await db.user.findUnique({
     where: { id : post.authorId },
-    select: { is_private: true, followers: true },
+    select: { is_private: true, followers: { where: { followerId: userId } } },
   })
 
-  if (author?.is_private) {
-    // Check if the user is following the author
-    const isFollowing = await db.follow.findFirst({
-      where: {
-        followerId: userId,
-        followedId: post.authorId,
-     },
-    })
-
-    if(!isFollowing) {
-      return res.status(HttpStatus.NOT_FOUND).json({ message: 'Post not found or private account' })
-    }
+  if (author?.is_private && author.followers.length === 0) {
+    return res.status(HttpStatus.NOT_FOUND).json({ message: 'Post not found or private account' })
   }
 
   return res.status(HttpStatus.OK).json(post)
 })
 
+/**
+ * @swagger
+ * /api/post/by_user/{userId}:
+ *   get:
+ *     security:
+ *       - bearer: []
+ *     summary: Get posts by a specific user
+ *     tags: [Post]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The user ID whose posts to retrieve
+ *     responses:
+ *       200:
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Post'
+ *       404:
+ *         description: Posts not found or private account
+ */
 postRouter.get('/by_user/:userId', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
   const { userId: authorId } = req.params
@@ -125,28 +132,38 @@ postRouter.get('/by_user/:userId', async (req: Request, res: Response) => {
   const posts = await service.getPostsByAuthor(userId, authorId)
   const author = await db.user.findUnique({
     where: { id: authorId },
-    select: { is_private: true, followers: true },
+    select: { is_private: true, followers: { where: { followerId: userId } } },
   })
 
-  if(author?.is_private) {
-    // Check if the user is following the author
-    const isFollowing = await db.follow.findFirst({
-      where: {
-        followerId: userId,
-        followedId: authorId,
-      },
-    })
-
-    if(!isFollowing) {
-      return res.status(HttpStatus.NOT_FOUND).json({ message: 'Post not found or private account' })
-
-    }
+  if(author?.is_private && author.followers.length === 0) {
+    return res.status(HttpStatus.NOT_FOUND).json({ message: 'Post not found or private account' })
   }
-
 
   return res.status(HttpStatus.OK).json(posts)
 })
 
+/**
+ * @swagger
+ * /api/post:
+ *   post:
+ *     security:
+ *       - bearer: []
+ *     summary: Create a new post
+ *     tags: [Post]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreatePostInput'
+ *     responses:
+ *       201:
+ *         description: Post created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Post'
+ */
 postRouter.post('/', BodyValidation(CreatePostInputDTO), async (req: Request, res: Response) => {
   const { userId } = res.locals.context
   const data = req.body
@@ -156,6 +173,27 @@ postRouter.post('/', BodyValidation(CreatePostInputDTO), async (req: Request, re
   return res.status(HttpStatus.CREATED).json(post)
 })
 
+/**
+ * @swagger
+ * /api/post/{postId}:
+ *   delete:
+ *     security:
+ *       - bearer: []
+ *     summary: Delete a post by ID
+ *     tags: [Post]
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The post ID to delete
+ *     responses:
+ *       200:
+ *         description: Post deleted successfully
+ *       404:
+ *         description: Post not found
+ */
 postRouter.delete('/:postId', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
   const { postId } = req.params

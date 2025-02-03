@@ -1,17 +1,4 @@
-import { FollowerRepository } from "../repository/follower.repository";
-
-export class FollowerService {
-  private followerRepository: FollowerRepository;
-
-  constructor() {
-    this.followerRepository = new FollowerRepository();
-  }
-
-  async followUser(followerId: string, followedId: string) {
-    return this.followerRepository.followUser(followerId, followedId);
-  }
-
-  async unfollowUser(followerId: string, followedId: string) {
-    return this.followerRepository.unfollowUser(followerId, followedId);
-  }
+export interface FollowerService {
+  followUser: (userId: string, targetUserId: string) => Promise<boolean>
+  unfollowUser: (userId: string, targetUserId: string) => Promise<boolean>
 }

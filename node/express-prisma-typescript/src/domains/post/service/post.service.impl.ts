@@ -29,7 +29,7 @@ export class PostServiceImpl implements PostService {
 
   async getLatestPosts (userId: string, options: CursorPagination): Promise<PostDTO[]> {
     // TODO: filter post search to return posts from authors that the user follows
-    return await this.repository.getAllByDatePaginated(options)
+    return await this.repository.getAllByDatePaginated(options, userId)
   }
 
   async getPostsByAuthor (userId: any, authorId: string): Promise<PostDTO[]> {
