@@ -15,9 +15,9 @@ export class UserServiceImpl implements UserService {
     if (!user) throw new NotFoundException('user')
       const userView = new UserViewDTO({
         id: user.id,
-        name: user.name || '',  // Aseguramos que name nunca sea null
-        username: user.username || '',  // Asignamos valor por defecto si es null
-        profilePicture: user.profilePicture || ''  // Asignamos valor por defecto si es null
+        name: user.name || '',  
+        username: user.username || '',  
+        profilePicture: user.profilePicture || ''  
       })
     return userView
   }
@@ -31,7 +31,7 @@ export class UserServiceImpl implements UserService {
       name: user.name || '',
       username: user.username || '',
       profilePicture: user.profilePicture || ''
-    }))  // Convertimos cada usuario a UserViewDTO
+    })) 
   }
 
   async deleteUser (userId: any): Promise<void> {
