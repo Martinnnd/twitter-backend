@@ -1,81 +1,59 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// The generator block runs every time you run `prisma generate`.
-// The prisma-client-js is the default generator that builds ts types based on the db models.
-// You can find more about generators here: https://www.prisma.io/docs/concepts/components/prisma-schema/generators
 generator client {
   provider = "prisma-client-js"
 }
 
-// The datasource block specifies the url to your DBMS.
-// You only need to set the DATABASE_URL in your environment file.
-// You can find more about datasources here: https://www.prisma.io/docs/concepts/components/prisma-schema/data-sources
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid // Primary Key
-
-  username   String  @unique // Unique constraint
-  name       String? @db.VarChar(35) // Limit display name to 35 characters
-  email      String  @unique // Unique constraint
+  id         String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username   String     @unique
+  name       String?    @db.VarChar(35)
+  email      String     @unique
   password   String
-  is_private Boolean @default(false)
-  
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime? // Optional value 
-
-  posts     Post[]
-  follows   Follow[] @relation(name: "follows")
-  followers Follow[] @relation(name: "followers")
-  reactions Reaction[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  deletedAt  DateTime?
+  is_private Boolean    @default(false)
+  followers  Follow[]   @relation("followers")
+  follows    Follow[]   @relation("follows")
+  posts      Post[]
+  reactions  Reaction[]
 }
 
 model Follow {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid // Primary Key
-
-  followerId String @db.Uuid()
-  followedId String @db.Uuid()
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime? // Optional value
-
-  follower User @relation(name: "follows", fields: [followerId], references: [id], onDelete: Cascade) // One to many
-  followed User @relation(name: "followers", fields: [followedId], references: [id], onDelete: Cascade) // One to many
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  followerId String    @db.Uuid
+  followedId String    @db.Uuid
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+  followed   User      @relation("followers", fields: [followedId], references: [id], onDelete: Cascade)
+  follower   User      @relation("follows", fields: [followerId], references: [id], onDelete: Cascade)
 }
 
 model Post {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid // Primary Key
-
-  authorId String   @db.Uuid // Foreign Key
-  content  String   @db.VarChar(240) // Limit the content to 240 characters
-  images   String[]
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime? // Optional value
-
-  author User @relation(fields: [authorId], references: [id], onDelete: Cascade) // One to many
+  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  authorId  String     @db.Uuid
+  content   String     @db.VarChar(240)
+  images    String[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?
+  author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
   reactions Reaction[]
 }
 
 model Reaction {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid // Primary Key
-
-  userId String @db.Uuid // Foreign Key
-  postId String @db.Uuid // Foreign Key
-  type   ReactionType
-
-  createdAt DateTime  @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade) 
-  post Post @relation(fields: [postId], references: [id], onDelete: Cascade) 
+  id        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String       @db.Uuid
+  postId    String       @db.Uuid
+  type      ReactionType
+  createdAt DateTime     @default(now())
+  post      Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum ReactionType {

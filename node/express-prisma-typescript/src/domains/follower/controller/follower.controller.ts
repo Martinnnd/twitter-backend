@@ -1,15 +1,16 @@
-import { Request, Response, Router } from 'express'
-import HttpStatus from 'http-status'
-import 'express-async-errors'
+import { Request, Response, Router } from 'express';
+import HttpStatus from 'http-status';
+import 'express-async-errors';
 
-import { db } from '@utils'
-import { FollowerRepositoryImpl } from '../repository'
-import { FollowerService, FollowerServiceImpl } from '../service'
+import { db } from '@utils';
+import { FollowerRepositoryImpl } from '../repository';
+import { FollowerService, FollowerServiceImpl } from '../service';
+import { UserRepositoryImpl } from '@domains/user/repository';
 
-export const followerRouter = Router()
+export const followerRouter = Router();
 
 // Use dependency injection
-const service: FollowerService = new FollowerServiceImpl(new FollowerRepositoryImpl(db))
+const service: FollowerService = new FollowerServiceImpl(new FollowerRepositoryImpl(db), new UserRepositoryImpl(db));
 
 /**
  * @swagger
@@ -33,18 +34,17 @@ const service: FollowerService = new FollowerServiceImpl(new FollowerRepositoryI
  *         description: User not found or already following
  */
 followerRouter.post('/follow/:userId', async (req: Request, res: Response) => {
-  const { userId } = res.locals.context
-  const { userId: targetUserId } = req.params
+  const { userId } = res.locals.context;
+  const { userId: targetUserId } = req.params;
 
-  // Llamada al servicio para seguir al usuario
-  const result = await service.followUser(userId, targetUserId)
+  const result = await service.followUser(userId, targetUserId);
 
   if (!result) {
-    return res.status(HttpStatus.NOT_FOUND).json({ message: 'User not found or already following' })
+    return res.status(HttpStatus.NOT_FOUND).json({ message: 'User not found or already following' });
   }
 
-  return res.status(HttpStatus.OK).json({ message: 'Followed successfully' })
-})
+  return res.status(HttpStatus.OK).json({ message: 'Followed successfully' });
+});
 
 /**
  * @swagger
@@ -68,15 +68,51 @@ followerRouter.post('/follow/:userId', async (req: Request, res: Response) => {
  *         description: User not found or not following
  */
 followerRouter.post('/unfollow/:userId', async (req: Request, res: Response) => {
-  const { userId } = res.locals.context
-  const { userId: targetUserId } = req.params
+  const { userId } = res.locals.context;
+  const { userId: targetUserId } = req.params;
 
   // Llamada al servicio para dejar de seguir al usuario
-  const result = await service.unfollowUser(userId, targetUserId)
+  const result = await service.unfollowUser(userId, targetUserId);
 
   if (!result) {
-    return res.status(HttpStatus.NOT_FOUND).json({ message: 'User not found or not following' })
+    return res.status(HttpStatus.NOT_FOUND).json({ message: 'User not found or not following' });
   }
 
-  return res.status(HttpStatus.OK).json({ message: 'Unfollowed successfully' })
-})
+  return res.status(HttpStatus.OK).json({ message: 'Unfollowed successfully' });
+});
+
+// followerRouter.get('/doesFollow/:user_id', async (req: Request, res: Response) => {
+//   const { userId } = res.locals.context
+//   const { user_id: targetUserId } = req.params
+
+//   const doesFollow = await service.doesFollow(userId, targetUserId)
+
+//   return res.status(HttpStatus.OK).json({ message: result })
+// }
+
+/**
+ * @swagger
+ * /api/follower/followers/{userId}:
+ *   get:
+ *     security:
+ *       - bearer: []
+ *     summary: Get a list of followers
+ *     tags: [Follower]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The user ID to get the followers from
+ *     responses:
+ *       200:
+ *         description: A list of followers
+ */
+followerRouter.get('/followers/:userId', async (req: Request, res: Response) => {
+  const { userId } = req.params;
+
+  const followers = await service.getFollowers(userId);
+
+  return res.status(HttpStatus.OK).json(followers);
+});

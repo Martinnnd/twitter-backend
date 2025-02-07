@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { FollowerRepository } from './'
+import { FollowerDto } from '../dto'
 
 export class FollowerRepositoryImpl implements FollowerRepository {
   constructor (private readonly db: PrismaClient) {}
@@ -48,5 +49,36 @@ export class FollowerRepositoryImpl implements FollowerRepository {
     })
 
     return true
+  }
+
+  async getByIds (followerId: string, followedId: string): Promise<FollowerDto | null>{
+    const follow = await this.db.follow.findFirst({
+      where: {
+        followerId,
+        followedId
+      }
+    })
+
+    return follow != null ? new FollowerDto(follow) : null
+  }
+
+  async getFollowers (userId: string): Promise<FollowerDto[]> {
+    const followers = await this.db.follow.findMany({
+      where: {
+        followedId: userId
+      }
+    })
+
+    return followers.map(follower => new FollowerDto(follower))
+  }
+
+  async getFollows (userId: string): Promise<FollowerDto[]> {
+    const follows = await this.db.follow.findMany({
+      where: {
+        followerId: userId
+      }
+    })
+
+    return follows.map(follow => new FollowerDto(follow))
   }
 }
