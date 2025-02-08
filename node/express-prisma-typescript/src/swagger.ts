@@ -9,10 +9,14 @@ const swaggerOptions = {
       description: 'This is the API documentation for our project.',
     },
   },
-  apis: ['./src/domains/post/controller/*.ts', './src/domains/user/controller/*.ts', './src/domains/auth/controller/*.ts', './src/domains/health/controller/*.ts,' , './src/domains/follower/controller/*.ts'], 
+  apis: [
+    './src/domains/post/controller/*.ts',
+    './src/domains/user/controller/*.ts',
+    './src/domains/auth/controller/*.ts',
+    './src/domains/health/controller/*.ts,',
+    './src/domains/follower/controller/*.ts',
+    './src/domains/reaction/controller/*.ts'
+  ],
 };
 
 export const swaggerDocs = swaggerJsDoc(swaggerOptions);
-
-
-

@@ -116,3 +116,52 @@ followerRouter.get('/followers/:userId', async (req: Request, res: Response) => 
 
   return res.status(HttpStatus.OK).json(followers);
 });
+
+/**
+ * @swagger
+ * /api/follower/followings/{userId}:
+ *   get:
+ *     security:
+ *       - bearer: []
+ *     summary: Get a list of followings
+ *     tags: [Follower]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The user ID to get the followings from
+ *     responses:
+ *       200:
+ *         description: A list of followings
+ */
+followerRouter.get('/followings/:userId', async (req: Request, res: Response) => {
+  const { userId } = req.params;
+
+  const followings = await service.getFollowings(userId);
+
+  return res.status(HttpStatus.OK).json(followings);
+});
+
+/**
+ * @swagger
+ * /api/follower/mutual:
+ *   get:
+ *     security:
+ *       - bearer: []
+ *     summary: Get a list of mutual followers
+ *     tags: [Follower]
+ *     responses:
+ *       200:
+ *         description: A list of mutual followers
+ */
+followerRouter.get('/mutual', async (req: Request, res: Response) => {
+  const { userId } = res.locals.context
+
+  const mutuals = await service.getMutuals(userId)
+
+  return res.status(HttpStatus.OK).json(mutuals)
+}); 
+
+

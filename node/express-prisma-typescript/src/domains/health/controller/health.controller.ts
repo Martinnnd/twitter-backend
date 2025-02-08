@@ -9,11 +9,11 @@ export const healthRouter = Router()
  * @swagger
  * /api/health:
  *   get:
- *     summary: Health check endpoint
+ *     summary: Health check
  *     tags: [Health]
  *     responses:
  *       200:
- *         description: Server is healthy
+ *         description: Health check OK
  */
 healthRouter.get('/', (req: Request, res: Response) => {
   return res.status(HttpStatus.OK).send()

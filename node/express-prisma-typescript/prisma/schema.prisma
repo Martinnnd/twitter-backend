@@ -9,14 +9,17 @@ datasource db {
 
 model User {
   id         String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
   username   String     @unique
   name       String?    @db.VarChar(35)
   email      String     @unique
   password   String
+
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
   deletedAt  DateTime?
   is_private Boolean    @default(false)
+
   followers  Follow[]   @relation("followers")
   follows    Follow[]   @relation("follows")
   posts      Post[]
@@ -25,23 +28,34 @@ model User {
 
 model Follow {
   id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
   followerId String    @db.Uuid
   followedId String    @db.Uuid
+
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
   deletedAt  DateTime?
+
   followed   User      @relation("followers", fields: [followedId], references: [id], onDelete: Cascade)
   follower   User      @relation("follows", fields: [followerId], references: [id], onDelete: Cascade)
 }
 
 model Post {
   id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
   authorId  String     @db.Uuid
   content   String     @db.VarChar(240)
   images    String[]
+  isComment Boolean    @default(false)
+  parentId  String?    @db.Uuid
+  qtyLikes  Int        @default(0)
+  qtyRetweets Int       @default(0)
+  qtyComments Int       @default(0)
+
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   deletedAt DateTime?
+
   author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
   reactions Reaction[]
 }
