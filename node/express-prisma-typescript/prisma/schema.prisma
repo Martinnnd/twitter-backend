@@ -13,12 +13,16 @@ model User {
   name       String?    @db.VarChar(35)
   email      String     @unique
   password   String
+  isPrivate Boolean    @default(false)
+  profilePicture String? @db.VarChar(255)
+
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
   deletedAt  DateTime?
-  is_private Boolean    @default(false)
+
   followers  Follow[]   @relation("followers")
   follows    Follow[]   @relation("follows")
+
   posts      Post[]
   reactions  Reaction[]
 }

@@ -88,10 +88,10 @@ postRouter.get('/:postId', async (req: Request, res: Response) => {
   const post = await service.getPost(userId, postId)
   const author = await db.user.findUnique({
     where: { id : post.authorId },
-    select: { is_private: true, followers: { where: { followerId: userId } } },
+    select: { isPrivate: true, followers: { where: { followerId: userId } } },
   })
 
-  if (author?.is_private && author.followers.length === 0) {
+  if (author?.isPrivate && author.followers.length === 0) {
     return res.status(HttpStatus.NOT_FOUND).json({ message: 'Post not found or private account' })
   }
 
@@ -132,10 +132,10 @@ postRouter.get('/by_user/:userId', async (req: Request, res: Response) => {
   const posts = await service.getPostsByAuthor(userId, authorId)
   const author = await db.user.findUnique({
     where: { id: authorId },
-    select: { is_private: true, followers: { where: { followerId: userId } } },
+    select: { isPrivate: true, followers: { where: { followerId: userId } } },
   })
 
-  if(author?.is_private && author.followers.length === 0) {
+  if(author?.isPrivate && author.followers.length === 0) {
     return res.status(HttpStatus.NOT_FOUND).json({ message: 'Post not found or private account' })
   }
 

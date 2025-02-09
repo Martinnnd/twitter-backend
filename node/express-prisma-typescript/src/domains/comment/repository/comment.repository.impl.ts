@@ -11,14 +11,14 @@ export class CommentRepositoryImpl implements CommentRepository {
     const comment = await this.db.post.create({
       data: {
         authorId: userId,
-        iscomment: true,
+        isComment: true,
         ...data
       }
     })
     return new PostDTO(comment);
   }
 
-  async getAllByPostId(postId: string, pagination: CursorPagination): Promise<ExtendedPostDTO[]> {
+  async getAllByPostId(postId: string, options: CursorPagination): Promise<ExtendedPostDTO[]> {
     const comments = await this.db.post.findMany({
         where: {
             isComment: true,

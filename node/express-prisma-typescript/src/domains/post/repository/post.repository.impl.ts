@@ -23,9 +23,9 @@ export class PostRepositoryImpl implements PostRepository {
       where: {
         OR: [
           // public accounts
-          { author: { is_private: false } },
+          { author: { isPrivate: false } },
           // private accounts that the user follows
-          { authorId: userId, author: { is_private: true } },
+          { authorId: userId, author: { isPrivate: true } },
         ],
       },
       cursor: after ? { id: after } : before ? { id: before } : undefined,

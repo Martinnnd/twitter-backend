@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { FollowerRepository } from './'
+import { FollowerRepository } from '.'
 import { FollowerDto } from '../dto'
 
 export class FollowerRepositoryImpl implements FollowerRepository {

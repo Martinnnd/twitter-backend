@@ -13,21 +13,14 @@ export class UserRepositoryImpl implements UserRepository {
     }).then(user => new UserDTO(user))
   }
 
-  async getById(userId: any): Promise<UserViewDTO | null> {
+  async getById(userId: any): Promise<ExtendedUserDTO | null> {
     const user = await this.db.user.findUnique({
       where: {
         id: userId,
       }
     })
   
-    return user
-      ? new UserViewDTO({
-          id: user.id,
-          username: user.username || '',
-          name: user.name || '',
-          profilePicture: '', // Asegurar que tenga un valor
-        })
-      : null
+    return user ? new ExtendedUserDTO(user) : null
   }
   
 
@@ -39,23 +32,50 @@ export class UserRepositoryImpl implements UserRepository {
     })
   }
 
-  async getRecommendedUsersPaginated(options: OffsetPagination): Promise<UserViewDTO[]> {
+  async getRecommendedUsersPaginated(userId: string, options: OffsetPagination): Promise<UserViewDTO[]> {
+    const following = await this.db.user.findMany({
+      where: {
+        followers: {
+          some: {
+            followerId: userId
+          }
+        }
+      }
+    })
+
+    let recommendedUserIds: string[] = []
+    for (const user of following) {
+      const theirFollowing = await this.db.user.findMany({
+        where: {
+          followers: {
+            some: {
+              followerId: user.id
+            }
+          }
+        }
+      })
+
+      recommendedUserIds = [...recommendedUserIds, ...theirFollowing.map((user) => user.id)]
+    }
+
+    recommendedUserIds = [...new Set(recommendedUserIds)]
+    recommendedUserIds = recommendedUserIds.filter((id) => id !== userId)
+
     const users = await this.db.user.findMany({
+      where: {
+        id: {
+          in: recommendedUserIds
+        },
+        isPrivate: false
+      },
       take: options.limit ? options.limit : undefined,
       skip: options.skip ? options.skip : undefined,
-      orderBy: [
-        {
-          id: 'asc'
-        }
-      ]
+      orderBy: {
+        id: 'asc'
+      }
     })
-  
-    return users.map(user => new UserViewDTO({
-      id: user.id,
-      username: user.username || '',
-      name: user.name || '',
-      profilePicture: '', // Asegurar que tenga un valor
-    }))
+
+    return users.map((user) => new UserViewDTO(user))
   }
   
 
