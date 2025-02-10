@@ -1,5 +1,5 @@
 import { NotFoundException } from '@utils/errors';
-import { OffsetPagination } from 'types';
+import { CursorPagination, OffsetPagination } from 'types';
 import { ExtendedUserDTO, UserDTO, UserViewDTO } from '../dto';
 import { UserRepository } from '../repository';
 import { UserService } from './user.service';
@@ -23,6 +23,20 @@ export class UserServiceImpl implements UserService {
     const filterResults = await Promise.all(filterPromises);
     const filteredUsers = users.filter((_, index) => filterResults[index]);
     return filteredUsers.map((user) => new UserViewDTO(user));
+  }
+
+  async getUserView(userId: string, loggedUser: string): Promise<{ user: UserViewDTO, followsYou: boolean, following: boolean }> {
+    const user = await this.repository.getById(userId)
+    if(!user) throw new NotFoundException('user')
+    const followsYou = await this.followerRepository.getByIds(userId, loggedUser)
+    const following = await this.followerRepository.getByIds(loggedUser, userId)
+    const userView = new UserViewDTO(user)
+    return { user: userView, followsYou: followsYou != null, following: following != null }
+  }
+
+  async getUsersByUsername (username: string, options: CursorPagination): Promise<UserViewDTO[]> {
+    const users = await this.repository.getByUsernamePaginated(username, options)
+    return users.map((user) => new UserViewDTO(user))
   }
 
   async deleteUser(userId: any): Promise<void> {

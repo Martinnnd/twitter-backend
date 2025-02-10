@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { CursorPagination } from '@types';
 import { PostRepository } from '.';
-import { CreatePostInputDTO, PostDTO } from '../dto';
+import { CreatePostInputDTO, ExtendedPostDTO, PostDTO } from '../dto';
 
 export class PostRepositoryImpl implements PostRepository {
   constructor(private readonly db: PrismaClient) {}
@@ -16,32 +16,29 @@ export class PostRepositoryImpl implements PostRepository {
     return new PostDTO(post);
   }
 
-  async getAllByDatePaginated(options: CursorPagination, userId: string): Promise<PostDTO[]> {
-    const { after, before, limit } = options;
-
+  async getAllByDatePaginated (options: CursorPagination): Promise<ExtendedPostDTO[]> {
     const posts = await this.db.post.findMany({
+      cursor: options.after ? { id: options.after } : options.before ? { id: options.before } : undefined,
+      skip: options.after ?? options.before ? 1 : undefined,
+      take: options.limit ? (options.before ? -options.limit : options.limit) : undefined,
       where: {
-        OR: [
-          // public accounts
-          { author: { isPrivate: false } },
-          // private accounts that the user follows
-          { authorId: userId, author: { isPrivate: true } },
-        ],
+        parentId: null,
+        isComment: false
       },
-      cursor: after ? { id: after } : before ? { id: before } : undefined,
-      skip: after || before ? 1 : undefined,
-      take: limit ? (before ? -limit : limit) : undefined,
       orderBy: [
         {
-          createdAt: 'desc',
+          createdAt: 'desc'
         },
         {
-          id: 'asc',
-        },
+          id: 'asc'
+        }
       ],
-    });
-
-    return posts.map((post) => new PostDTO(post));
+      include: {
+        author: true,
+        reactions: true
+      }
+    })
+    return posts.map((post) => new ExtendedPostDTO(post))
   }
 
   async delete(postId: string): Promise<void> {
@@ -52,22 +49,30 @@ export class PostRepositoryImpl implements PostRepository {
     });
   }
 
-  async getById(postId: string): Promise<PostDTO | null> {
+  async getById (postId: string): Promise<ExtendedPostDTO | null> {
     const post = await this.db.post.findUnique({
       where: {
-        id: postId,
+        id: postId
       },
-    });
-    return post != null ? new PostDTO(post) : null;
+      include: {
+        author: true,
+        reactions: true
+      }
+    })
+    return post != null ? new ExtendedPostDTO(post) : null
   }
 
-  async getByAuthorId(authorId: string): Promise<PostDTO[]> {
+  async getByAuthorId (authorId: string): Promise<ExtendedPostDTO[]> {
     const posts = await this.db.post.findMany({
       where: {
-        authorId,
+        authorId
       },
-    });
-    return posts.map((post) => new PostDTO(post));
+      include: {
+        author: true,
+        reactions: true
+      }
+    })
+    return posts.map((post) => new ExtendedPostDTO(post))
   }
 
   async addQtyLikes(postId: string): Promise<void> {
