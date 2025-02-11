@@ -3,6 +3,8 @@ import { CursorPagination, OffsetPagination } from 'types';
 import { ExtendedUserDTO, UserDTO, UserViewDTO } from '../dto';
 import { UserRepository } from '../repository';
 import { UserService } from './user.service';
+import { Constants } from '@utils/constants';
+import { generateS3UploadUrl } from '@utils/aws';
 import { FollowerRepository } from '@domains/follower/repository';
 
 export class UserServiceImpl implements UserService {
@@ -37,6 +39,20 @@ export class UserServiceImpl implements UserService {
   async getUsersByUsername (username: string, options: CursorPagination): Promise<UserViewDTO[]> {
     const users = await this.repository.getByUsernamePaginated(username, options)
     return users.map((user) => new UserViewDTO(user))
+  }
+
+  async setProfilePicture (userId: string, filetype: string): Promise<{ presignedUrl: string, profilePictureUrl: string}> {
+    const user = await this.repository.getById(userId)
+    if (!user) throw new NotFoundException('user')
+    const data = await generateS3UploadUrl(filetype)
+    const url = `https://${Constants.BUCKET_NAME}.s3.amazonaws.com/${data.filename}.jpeg`
+    await this.repository.setProfilePicture(userId, url)
+    return { presignedUrl: data.presignedUrl, profilePictureUrl: url }
+  }
+
+  async getProfilePicture (userId: string): Promise<string | null> {
+    const url = await this.repository.getProfilePicture(userId)
+    return url
   }
 
   async deleteUser(userId: any): Promise<void> {

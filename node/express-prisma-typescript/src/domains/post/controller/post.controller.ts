@@ -179,6 +179,48 @@ postRouter.post('/', BodyValidation(CreatePostInputDTO), async (req: Request, re
 
 /**
  * @swagger
+ * /api/post/image/presignedUrl:
+ *   get:
+ *     security:
+ *       - bearer: []
+ *     summary: Get a pre-signed URL for uploading an image
+ *     tags: [Post]
+ *     parameters:
+ *       - in: query
+ *         name: filetype
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The MIME type of the image to be uploaded (e.g., "image/png", "image/jpeg")
+ *     responses:
+ *       200:
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 presignedUrl:
+ *                   type: string
+ *                   description: The pre-signed URL for uploading the image
+ *                 filename:
+ *                   type: string
+ *                   description: The generated filename for the uploaded image
+ *       400:
+ *         description: Bad request, missing or invalid filetype
+ */
+postRouter.get('/image/presignedUrl', async (req: Request, res: Response) => {
+  const { filetype } = req.query as Record<string, string>
+
+  const data = await service.setPostImage(filetype)
+  
+  if(data !== null) {
+    return res.status(HttpStatus.OK).json(data)
+  }
+})
+
+/**
+ * @swagger
  * /api/post/{postId}:
  *   delete:
  *     security:

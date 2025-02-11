@@ -7,4 +7,6 @@ export interface UserService {
   getUserView: (userId: string, loggedUser: string) => Promise<{ user: UserViewDTO, followsYou: boolean, following: boolean }>
   getUsersByUsername: (username: string, options: OffsetPagination) => Promise<UserViewDTO[]>
   deleteUser: (userId: any) => Promise<void>
+  setProfilePicture (userId: string, filetype: string): Promise<{ presignedUrl: string, profilePictureUrl: string}>
+  getProfilePicture (userId: string): Promise<string | null>
 }

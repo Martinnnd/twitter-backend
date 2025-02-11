@@ -111,4 +111,29 @@ export class UserRepositoryImpl implements UserRepository {
     })
     return user ? new ExtendedUserDTO(user) : null
   }
+
+  async setProfilePicture(userId: string, profilePicture: string): Promise<void> {
+    await this.db.user.update({
+      where: {
+        id: userId
+      },
+      data: {
+        profilePicture
+      }
+    })
+  }
+
+  async getProfilePicture(userId: string): Promise<string | null> {
+    const user = await this.db.user.findUnique({
+      where: {
+        id: userId
+      }
+    })
+
+    return user?.profilePicture ?? null
+  }
+
+
+
+
 }

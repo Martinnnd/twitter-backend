@@ -2,9 +2,10 @@ import { CreatePostInputDTO, PostDTO } from '../dto'
 import { PostRepository } from '../repository'
 import { PostService } from '.'
 import { validate } from 'class-validator'
-import { ForbiddenException, NotFoundException } from '@utils'
+import { ForbiddenException, NotFoundException, Constants } from '@utils'
 import { CursorPagination } from '@types'
 import { ExtendedPostDTO } from '../dto'
+import { generateS3UploadUrl } from '@utils/aws'
 import { FollowerRepository } from '@domains/follower/repository'
 import { UserRepository } from '@domains/user/repository'
 
@@ -72,6 +73,17 @@ export class PostServiceImpl implements PostService {
       throw new NotFoundException('user')
     }
     return await this.repository.getByAuthorId(authorId)
+  }
+
+  async setPostImage(filetype: string): Promise<{ presignedUrl: string, fileUrl: string}> {
+    const presignedData = await generateS3UploadUrl(filetype)
+    const extension = filetype.split('/')[1]
+    const fileUrl = `https://${Constants.BUCKET_NAME}.s3.amazonaws.com/${presignedData.filename}.${extension}`
+    const data = {
+      presignedUrl: presignedData.presignedUrl,
+      fileUrl
+    }
+    return data
   }
 
 
