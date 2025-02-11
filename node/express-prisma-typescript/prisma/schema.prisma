@@ -25,6 +25,8 @@ model User {
 
   posts      Post[]
   reactions  Reaction[]
+  messagesSended Message[] @relation("messagesSended")
+  messagesReceived Message[] @relation("messagesReceived")
 }
 
 model Follow {
@@ -68,4 +70,17 @@ model Reaction {
 enum ReactionType {
   LIKE
   RETWEET
+}
+
+model Message {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  from      String    @db.Uuid
+  to        String    @db.Uuid
+  content   String
+
+  createdAt DateTime  @default(now())
+
+  sender    User      @relation(name: "messagesSended", fields: [from], references: [id], onDelete: Cascade)
+  receiver  User      @relation(name: "messagesReceived", fields: [to], references: [id], onDelete: Cascade)
 }
