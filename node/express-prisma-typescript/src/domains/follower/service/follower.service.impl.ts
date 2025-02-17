@@ -8,7 +8,7 @@ import { UserViewDTO } from '@domains/user/dto'
 export class FollowerServiceImpl implements FollowerService {
   constructor (private readonly repository: FollowerRepository, private readonly userRepository: UserRepository) {}
 
-  async followUser(userId: string, targetUserId: string): Promise<boolean> {
+  async followUser(userId: string, targetUserId: string): Promise<FollowerDto> {
     return this.repository.follow(userId, targetUserId)
   }
 

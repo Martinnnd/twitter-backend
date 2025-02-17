@@ -17,3 +17,12 @@ export function BodyValidation<T> (target: ClassType<T>) {
     next()
   }
 }
+
+export function isValidReactionType(req: Request, res: Response, next: NextFunction): void {
+  const { type } = req.query
+  if (type !== undefined && !['LIKE', 'RETWEET'].includes(type as string)) {
+    throw new ValidationException([{ property: 'type', constraints: { isEnum: 'type must be a valid Reaction type' } }])
+  }
+
+  next()
+}

@@ -16,7 +16,7 @@ export class UserRepositoryImpl implements UserRepository {
   async getById(userId: any): Promise<ExtendedUserDTO | null> {
     const user = await this.db.user.findUnique({
       where: {
-        id: userId,
+        id: userId
       }
     })
   
@@ -78,7 +78,11 @@ export class UserRepositoryImpl implements UserRepository {
     return users.map((user) => new UserViewDTO(user))
   }
 
-  async getByUsernamePaginated(username: string, options: OffsetPagination): Promise<UserViewDTO[]> {
+  async getByUsernamePaginated(username: string, options: OffsetPagination): Promise<UserViewDTO[] | { message: string }> {
+    if (!username || username.trim() === '') {
+      return { message: 'Username is required' };
+    }
+  
     const users = await this.db.user.findMany({
       where: {
         username: {
@@ -90,10 +94,15 @@ export class UserRepositoryImpl implements UserRepository {
       orderBy: {
         username: 'asc'
       }
-    })
-
-    return users.map((user) => new UserViewDTO(user))
+    });
+  
+    if (users.length === 0) {
+      return { message: 'No users found with that username' };
+    }
+  
+    return users.map((user) => new UserViewDTO(user));
   }
+  
   
 
   async getByEmailOrUsername (email?: string, username?: string): Promise<ExtendedUserDTO | null> {

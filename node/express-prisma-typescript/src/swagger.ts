@@ -17,6 +17,7 @@ const swaggerOptions = {
     './src/domains/follower/controller/*.ts',
     './src/domains/reaction/controller/*.ts',
     './src/domains/comment/controller/*.ts',
+    './src/domains/message/controller/*.ts',
   ],
 };
 

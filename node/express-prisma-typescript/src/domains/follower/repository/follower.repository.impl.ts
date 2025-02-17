@@ -1,11 +1,20 @@
 import { PrismaClient } from '@prisma/client'
 import { FollowerRepository } from '.'
 import { FollowerDto } from '../dto'
+import { v4 as uuidv4, validate as uuidValidate } from 'uuid';
 
 export class FollowerRepositoryImpl implements FollowerRepository {
   constructor (private readonly db: PrismaClient) {}
 
-  async follow(userId: string, targetUserId: string): Promise<boolean> {
+  async follow(userId: string, targetUserId: string): Promise<FollowerDto> {
+
+    if (!uuidValidate(userId) || !uuidValidate(targetUserId)) {
+      throw new Error('User not found');
+    }
+
+    if (userId === targetUserId) {
+      throw new Error('You cannot follow yourself');
+    }
     // verify if already following
     const alreadyFollowing = await this.db.follow.findFirst({
       where: {
@@ -15,17 +24,17 @@ export class FollowerRepositoryImpl implements FollowerRepository {
     })
 
     if (alreadyFollowing) {
-      return false  // already following
+      throw new Error('User is already following') // already following
     }
 
-    await this.db.follow.create({
+    const follow = await this.db.follow.create({
       data: {
         followerId: userId,
         followedId: targetUserId
       }
     })
 
-    return true 
+    return new FollowerDto(follow) 
   }
 
   async unfollow(userId: string, targetUserId: string): Promise<boolean> {
@@ -65,6 +74,7 @@ export class FollowerRepositoryImpl implements FollowerRepository {
   async getFollowers (userId: string): Promise<FollowerDto[]> {
     const followers = await this.db.follow.findMany({
       where: {
+        
         followedId: userId
       }
     })

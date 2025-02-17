@@ -2,14 +2,14 @@ import { Request, Response, Router } from 'express'
 import HttpStatus from 'http-status'
 import 'express-async-errors'
 
-import { db, BodyValidation } from '@utils'
+import { db, BodyValidation, isValidReactionType } from '@utils'
 import { ReactionRepositoryImpl } from '../repository'
 import { ReactionService, ReactionServiceImpl } from '../service'
-import { CreateReactionDTO } from '../dto'
+import { PostRepositoryImpl } from '@domains/post/repository'
 
 export const reactionRouter = Router()
 
-const service: ReactionService = new ReactionServiceImpl(new ReactionRepositoryImpl(db))
+const service: ReactionService = new ReactionServiceImpl(new ReactionRepositoryImpl(db), new PostRepositoryImpl(db))
 
 /**
  * @swagger
@@ -38,10 +38,10 @@ const service: ReactionService = new ReactionServiceImpl(new ReactionRepositoryI
  *       400:
  *         description: Invalid request body
  */
-reactionRouter.post('/:postId', BodyValidation(CreateReactionDTO), async (req: Request, res: Response) => {
+reactionRouter.post('/:postId', isValidReactionType, async (req: Request, res: Response) => {
   const { userId } = res.locals.context
   const { postId } = req.params
-  const { type } = req.body
+  const type: any = req.query.type
 
   const reaction = await service.createReaction(userId, postId, type)
 
@@ -70,8 +70,9 @@ reactionRouter.post('/:postId', BodyValidation(CreateReactionDTO), async (req: R
 reactionRouter.delete('/:postId', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
   const { postId } = req.params
+  const type: any = req.query.type
 
   await service.deleteReaction(userId, postId)
 
-  return res.status(HttpStatus.OK).send(`Deleted reaction from post ${postId}`)
+  return res.status(HttpStatus.OK).send({ message: `deleted ${type as string} from post ${postId}` })
 })

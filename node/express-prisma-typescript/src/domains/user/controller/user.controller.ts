@@ -79,10 +79,7 @@ userRouter.get('/', async (req: Request, res: Response) => {
 userRouter.get('/me', async (req: Request, res: Response) => {
   const { userId } = res.locals.context;
 
-  // const user = await service.getUser(userId)
-
-  // return res.status(HttpStatus.OK).json(user)
-  const userView = await service.getUser(userId);
+  const userView = await service.getSelfUser(userId);
 
   return res.status(HttpStatus.OK).json(userView);
 });

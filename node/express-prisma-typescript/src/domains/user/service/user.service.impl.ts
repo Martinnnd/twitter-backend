@@ -38,7 +38,10 @@ export class UserServiceImpl implements UserService {
 
   async getUsersByUsername (username: string, options: CursorPagination): Promise<UserViewDTO[]> {
     const users = await this.repository.getByUsernamePaginated(username, options)
-    return users.map((user) => new UserViewDTO(user))
+    if ('message' in users) {
+      throw new Error(users.message);
+    }
+    return users.map((user) => new UserViewDTO(user));
   }
 
   async setProfilePicture (userId: string, filetype: string): Promise<{ presignedUrl: string, profilePictureUrl: string}> {
@@ -53,6 +56,13 @@ export class UserServiceImpl implements UserService {
   async getProfilePicture (userId: string): Promise<string | null> {
     const url = await this.repository.getProfilePicture(userId)
     return url
+  }
+
+  async getSelfUser( userId: string): Promise<UserViewDTO> {
+    const user = await this.repository.getById(userId)
+    if (!user) throw new NotFoundException('user')
+    const selfView = new UserViewDTO(user)
+    return selfView
   }
 
   async deleteUser(userId: any): Promise<void> {

@@ -1,23 +1,18 @@
-import { IsEnum, IsNotEmpty } from 'class-validator'
+// import { IsEnum, IsNotEmpty } from 'class-validator'
 
-enum ReactionType {
-  LIKE = 'LIKE',
-  RETWEET = 'RETWEET',
-}
+// enum ReactionType {
+//   LIKE = 'LIKE',
+//   RETWEET = 'RETWEET',
+// }
 
-export class CreateReactionDTO {
-  @IsEnum(ReactionType)
-  @IsNotEmpty()
-  type!: ReactionType
-}
+// export class CreateReactionDTO {
+//   @IsEnum(ReactionType)
+//   @IsNotEmpty()
+//   type!: ReactionType
+// }
 
 export class ReactionDTO {
-  id: string
-  userId: string
-  postId: string
-  type: ReactionType
-
-  constructor(reaction: { id: string, userId: string, postId: string, type: string }) {
+  constructor(reaction: ReactionDTO) {
 
     this.id = reaction.id
 
@@ -25,12 +20,17 @@ export class ReactionDTO {
 
     this.postId = reaction.postId
 
-    this.type = reaction.type as ReactionType
-
+    this.type = reaction.type
   }
+
+  id: string
+  userId: string
+  postId: string
+  type: string
+
 }
 
-export interface ReactionService {
-  addReaction: (userId: string, postId: string, type: ReactionType) => Promise<ReactionDTO>
-  removeReaction: (userId: string, postId: string) => Promise<void>
-}
+// export interface ReactionService {
+//   addReaction: (userId: string, postId: string, type: ReactionType) => Promise<ReactionDTO>
+//   removeReaction: (userId: string, postId: string) => Promise<void>
+// }

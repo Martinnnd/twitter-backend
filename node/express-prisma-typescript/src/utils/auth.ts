@@ -25,6 +25,14 @@ export const withAuth = (req: Request, res: Response, next: () => any): void => 
   })
 }
 
+export const verifyToken = (token: string) => {
+  try {
+    return jwt.verify(token, Constants.TOKEN_SECRET)
+  } catch (error) {
+    return null 
+  }
+}
+
 export const encryptPassword = async (password: string): Promise<string> => {
   return await bcrypt.hash(password, 10)
 }

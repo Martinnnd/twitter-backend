@@ -153,5 +153,5 @@ commentRouter.post('/:postId', BodyValidation(CreatePostInputDTO), async (req: R
   
     await service.deleteComment(userId, commentId)
   
-    return res.status(httpStatus.OK).send({ message: `Deleted comment ${commentId}` })
+    return res.status(httpStatus.OK).send({ message: `Deleted comment` })
   })

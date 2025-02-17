@@ -37,6 +37,10 @@ followerRouter.post('/follow/:userId', async (req: Request, res: Response) => {
   const { userId } = res.locals.context;
   const { userId: targetUserId } = req.params;
 
+  if (!targetUserId) {
+    return res.status(HttpStatus.NOT_FOUND).json({ message: 'User not found' });
+  }
+
   const result = await service.followUser(userId, targetUserId);
 
   if (!result) {

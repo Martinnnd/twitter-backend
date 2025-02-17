@@ -8,25 +8,22 @@ datasource db {
 }
 
 model User {
-  id         String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  username   String     @unique
-  name       String?    @db.VarChar(35)
-  email      String     @unique
-  password   String
-  isPrivate Boolean    @default(false)
-  profilePicture String? @db.VarChar(255)
-
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  deletedAt  DateTime?
-
-  followers  Follow[]   @relation("followers")
-  follows    Follow[]   @relation("follows")
-
-  posts      Post[]
-  reactions  Reaction[]
-  messagesSended Message[] @relation("messagesSended")
-  messagesReceived Message[] @relation("messagesReceived")
+  id               String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username         String     @unique
+  name             String?    @db.VarChar(35)
+  email            String     @unique
+  password         String
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  deletedAt        DateTime?
+  isPrivate        Boolean    @default(false)
+  profilePicture   String?    @db.VarChar(255)
+  followers        Follow[]   @relation("followers")
+  follows          Follow[]   @relation("follows")
+  messagesSended   Message[]  @relation("messagesSended")
+  messagesReceived Message[]  @relation("messagesReceived")
+  posts            Post[]
+  reactions        Reaction[]
 }
 
 model Follow {
@@ -67,20 +64,17 @@ model Reaction {
   user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model Message {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  from      String   @db.Uuid
+  to        String   @db.Uuid
+  content   String
+  createdAt DateTime @default(now())
+  sender    User     @relation("messagesSended", fields: [from], references: [id], onDelete: Cascade)
+  receiver  User     @relation("messagesReceived", fields: [to], references: [id], onDelete: Cascade)
+}
+
 enum ReactionType {
   LIKE
   RETWEET
-}
-
-model Message {
-  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-
-  from      String    @db.Uuid
-  to        String    @db.Uuid
-  content   String
-
-  createdAt DateTime  @default(now())
-
-  sender    User      @relation(name: "messagesSended", fields: [from], references: [id], onDelete: Cascade)
-  receiver  User      @relation(name: "messagesReceived", fields: [to], references: [id], onDelete: Cascade)
 }

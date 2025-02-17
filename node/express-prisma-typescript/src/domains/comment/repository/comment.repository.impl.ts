@@ -46,7 +46,8 @@ export class CommentRepositoryImpl implements CommentRepository {
     async delete (commentId: string): Promise<void> {
         await this.db.post.delete({
             where: {
-                id: commentId
+                id: commentId,
+                
             }
         })
     }
