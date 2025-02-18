@@ -46,12 +46,6 @@ const service: UserService = new UserServiceImpl(new UserRepositoryImpl(db), new
  *                 $ref: '#/components/schemas/User'
  */
 userRouter.get('/', async (req: Request, res: Response) => {
-  // const { userId } = res.locals.context
-  // const { limit, skip } = req.query as Record<string, string>
-
-  // const users = await service.getUserRecommendations(userId, { limit: Number(limit), skip: Number(skip) })
-
-  // return res.status(HttpStatus.OK).json(users)
   const { userId } = res.locals.context;
   const { limit, skip } = req.query as Record<string, string>;
 

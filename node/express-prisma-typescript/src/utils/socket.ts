@@ -19,7 +19,7 @@ const messageService = new MessageServiceImpl(
 
 export const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: '*',
     methods: ['GET', 'POST'],
   },
 });
@@ -28,13 +28,13 @@ io.use((socket: AuthenticatedSocket, next) => {
   const token = socket.handshake.query.token as string;
 
   if (!token) {
-    socket.disconnect();
+    Logger.warn('Socket connection rejected: No token provided');
     return next(new Error('INVALID_TOKEN'));
   }
 
   jwt.verify(token, Constants.TOKEN_SECRET, (err, decoded) => {
-    if (err || !decoded || typeof decoded === 'string') {
-      socket.disconnect();
+    if (err || !decoded || typeof decoded !== 'object') {
+      Logger.warn('Socket connection rejected: Invalid token');
       return next(new Error('INVALID_TOKEN'));
     }
 
@@ -44,17 +44,27 @@ io.use((socket: AuthenticatedSocket, next) => {
 });
 
 io.on('connection', (socket: AuthenticatedSocket) => {
-  if (!socket.userId) return socket.disconnect();
-  
+  if (!socket.userId) {
+    Logger.warn('Socket connection rejected: No userId found after authentication');
+    return socket.disconnect();
+  }
+
   Logger.info(`User connected: ${socket.userId}`);
+  socket.join(socket.userId); 
 
   socket.on('send_message', async ({ to, content }) => {
     if (!socket.userId) return;
+    
     try {
       const message = await messageService.sendMessage(socket.userId, to, content);
-      io.emit('new_message', message);
+      io.to(to).emit('new_message', message); 
+      io.to(socket.userId).emit('new_message', message); 
     } catch (error) {
-      Logger.error(error);
+      Logger.error(`Error sending message: ${error}`);
     }
+  });
+
+  socket.on('disconnect', () => {
+    Logger.info(`User disconnected: ${socket.userId}`);
   });
 });

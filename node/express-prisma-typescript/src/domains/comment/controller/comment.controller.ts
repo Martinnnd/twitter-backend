@@ -1,8 +1,8 @@
 import { Request, Response, Router } from 'express';
 import httpStatus from 'http-status';
 import 'express-async-errors';
-
 import { db, BodyValidation } from '@utils';
+
 import { CommentRepositoryImpl } from '../repository';
 import { CommentService, CommentServiceImpl } from '../service';
 import { FollowerRepositoryImpl } from '@domains/follower/repository';
@@ -12,7 +12,6 @@ import { CreatePostInputDTO } from '@domains/post/dto';
 
 export const commentRouter = Router();
 
-// Use dependency injection
 const service: CommentService = new CommentServiceImpl(
   new CommentRepositoryImpl(db),
   new FollowerRepositoryImpl(db),
@@ -22,136 +21,161 @@ const service: CommentService = new CommentServiceImpl(
 
 /**
  * @swagger
- * /api/comment/:post_id:
+ * /api/comment/{postId}:
  *   get:
  *     security:
  *       - bearer: []
- *     summary: Get comments by post id
+ *     summary: Get comments by post ID
  *     tags: [Comment]
  *     parameters:
  *       - in: path
- *         name: post_id
+ *         name: postId
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
- *         description: The post id
+ *         description: The post ID
  *     responses:
  *       200:
  *         description: OK
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Post'
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Post'
  */
 commentRouter.get('/:postId', async (req: Request, res: Response) => {
   const { userId } = res.locals.context;
   const { postId } = req.params;
-  const { limit, before, after } = req.query as Record<string, string>;
+  const { limit = '10', before, after } = req.query as Record<string, string>;
 
-  const comments = await service.getCommentsByPost(userId, postId, { limit: Number(limit), before, after });
+  if (!postId) {
+    return res.status(httpStatus.BAD_REQUEST).json({ error: 'Post ID is required' });
+  }
+
+  const comments = await service.getCommentsByPost(userId, postId, {
+    limit: Number(limit),
+    before,
+    after,
+  });
 
   return res.status(httpStatus.OK).json(comments);
 });
 
-
 /**
  * @swagger
- * /api/comment/by_user/:user_id:
+ * /api/comment/by_user/{userId}:
  *   get:
  *     security:
  *       - bearer: []
- *     summary: Get comments by user
+ *     summary: Get comments by a specific user
  *     tags: [Comment]
  *     parameters:
  *       - in: path
- *         name: user_id
+ *         name: userId
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
- *         description: The user id
+ *         description: The user ID whose comments to retrieve
  *     responses:
  *       200:
  *         description: OK
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Post'
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Post'
  */
 commentRouter.get('/by_user/:userId', async (req: Request, res: Response) => {
   const { userId } = res.locals.context;
   const { userId: authorId } = req.params;
 
-  const comments = await service.getCommentsByAuthor(userId, authorId);
+  if (!authorId) {
+    return res.status(httpStatus.BAD_REQUEST).json({ error: 'User ID is required' });
+  }
 
+  const comments = await service.getCommentsByAuthor(userId, authorId);
   return res.status(httpStatus.OK).json(comments);
 });
 
 /**
  * @swagger
- * /api/comment/:post_id:
+ * /api/comment/{postId}:
  *   post:
  *     security:
  *       - bearer: []
- *     summary: Create comment
+ *     summary: Create a new comment
  *     tags: [Comment]
  *     parameters:
  *       - in: path
- *         name: post_id
+ *         name: postId
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
- *         description: The post id
+ *         description: The post ID to comment on
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CreatePostInput'
+ *             $ref: '#/components/schemas/CreatePostInputDTO'
  *     responses:
  *       201:
- *         description: The comment was successfully created
+ *         description: Created
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Post'
  */
 commentRouter.post('/:postId', BodyValidation(CreatePostInputDTO), async (req: Request, res: Response) => {
-    const { userId } = res.locals.context
-    const { postId } = req.params
-    const data = { ...req.body, parentId: postId }
-    const comment = await service.createComment(userId, data)
-  
-    return res.status(httpStatus.CREATED).json(comment)
-  })
-  
-  /**
+  const { userId } = res.locals.context;
+  const { postId } = req.params;
+
+  if (!postId) {
+    return res.status(httpStatus.BAD_REQUEST).json({ error: 'Post ID is required' });
+  }
+
+  const data = { ...req.body, parentId: postId };
+  const comment = await service.createComment(userId, data);
+
+  return res.status(httpStatus.CREATED).json(comment);
+});
+
+/**
  * @swagger
- * /api/comment/:comment_id:
+ * /api/comment/{commentId}:
  *   delete:
  *     security:
  *       - bearer: []
- *     summary: Delete comment
+ *     summary: Delete a comment
  *     tags: [Comment]
  *     parameters:
  *       - in: path
- *         name: comment_id
+ *         name: commentId
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
- *         description: The comment id
+ *         description: The comment ID to delete
  *     responses:
  *       200:
- *         description: The comment was successfully deleted
+ *         description: OK
  *         content:
  *           application/json:
- *             example:
- *               message: Deleted comment {comment_id}
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
  */
-  commentRouter.delete('/:commentId', async (req: Request, res: Response) => {
-    const { userId } = res.locals.context
-    const { commentId } = req.params
-  
-    await service.deleteComment(userId, commentId)
-  
-    return res.status(httpStatus.OK).send({ message: `Deleted comment` })
-  })
+commentRouter.delete('/:commentId', async (req: Request, res: Response) => {
+  const { userId } = res.locals.context;
+  const { commentId } = req.params;
+
+  if (!commentId) {
+    return res.status(httpStatus.BAD_REQUEST).json({ error: 'Comment ID is required' });
+  }
+
+  await service.deleteComment(userId, commentId);
+  return res.status(httpStatus.OK).json({ message: 'Deleted comment successfully' });
+});
