@@ -35,7 +35,7 @@ afterAll(async () => {
 });
 
 describe('User End-to-End Tests', () => {
-  it('should get user recommendations', async () => {
+  it('Should get user recommendations', async () => {
     const res = await request(app)
       .get('/api/user')
       .set('Authorization', `Bearer ${authToken}`);
@@ -44,7 +44,7 @@ describe('User End-to-End Tests', () => {
     expect(Array.isArray(res.body)).toBe(true);
   });
 
-  it('should get current user data', async () => {
+  it('Should get current user data', async () => {
     const res = await request(app)
       .get('/api/user/me')
       .set('Authorization', `Bearer ${authToken}`);
@@ -54,7 +54,7 @@ describe('User End-to-End Tests', () => {
     expect(res.body).toHaveProperty('username', 'testuser');
   });
 
-  it('should get user by ID', async () => {
+  it('Should get user by ID', async () => {
     const res = await request(app)
       .get(`/api/user/${userId}`)
       .set('Authorization', `Bearer ${authToken}`);
@@ -63,7 +63,7 @@ describe('User End-to-End Tests', () => {
     expect(res.body).toHaveProperty('id', userId);
   });
 
-  it('should get users by username', async () => {
+  it('Should get users by username', async () => {
     const res = await request(app)
       .get(`/api/user/by_username/testuser`)
       .set('Authorization', `Bearer ${authToken}`);
@@ -73,7 +73,7 @@ describe('User End-to-End Tests', () => {
     expect(res.body.length).toBeGreaterThan(0);
   });
 
-  it('should delete current user', async () => {
+  it('Should delete current user', async () => {
     const res = await request(app)
       .delete('/api/user')
       .set('Authorization', `Bearer ${authToken}`);

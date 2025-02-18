@@ -37,7 +37,7 @@ afterAll(async () => {
 });
 
 describe('Post End-to-End Tests', () => {
-  it('should create a new post', async () => {
+  it('Should create a new post', async () => {
     const res = await request(app)
       .post('/api/post')
       .set('Authorization', `Bearer ${authToken}`)
@@ -52,7 +52,7 @@ describe('Post End-to-End Tests', () => {
     postId = res.body.id;
   });
 
-  it('should get latest posts', async () => {
+  it('Should get latest posts', async () => {
     const res = await request(app)
       .get('/api/post')
       .set('Authorization', `Bearer ${authToken}`);
@@ -61,7 +61,7 @@ describe('Post End-to-End Tests', () => {
     expect(Array.isArray(res.body)).toBe(true);
   });
 
-  it('should get a post by ID', async () => {
+  it('Should get a post by ID', async () => {
     const res = await request(app)
       .get(`/api/post/${postId}`)
       .set('Authorization', `Bearer ${authToken}`);
@@ -70,7 +70,7 @@ describe('Post End-to-End Tests', () => {
     expect(res.body).toHaveProperty('id', postId);
   });
 
-  it('should get posts by user ID', async () => {
+  it('Should get posts by user ID', async () => {
     const res = await request(app)
       .get(`/api/post/by_user/${userId}`)
       .set('Authorization', `Bearer ${authToken}`);
@@ -79,7 +79,7 @@ describe('Post End-to-End Tests', () => {
     expect(Array.isArray(res.body)).toBe(true);
   });
 
-  it('should get a presigned URL for image upload', async () => {
+  it('Should get a presigned URL for image upload', async () => {
     const res = await request(app)
       .get('/api/post/image/presignedUrl?filetype=image/png')
       .set('Authorization', `Bearer ${authToken}`);
@@ -89,7 +89,7 @@ describe('Post End-to-End Tests', () => {
     expect(res.body).toHaveProperty('filename');
   });
 
-  it('should delete a post', async () => {
+  it('Should delete a post', async () => {
     const res = await request(app)
       .delete(`/api/post/${postId}`)
       .set('Authorization', `Bearer ${authToken}`);

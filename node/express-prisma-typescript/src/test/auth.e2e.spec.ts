@@ -5,12 +5,12 @@ import { app } from '../server';
 let server: any;
 
 describe('Auth End-to-End Tests', () => {
-  it('should return 404 for an unknown route', async () => {
+  it('Should return 404 for an unknown route', async () => {
     const res = await request(app).get('/unknown-route');
     expect(res.status).toBe(404);
   });
 
-  it('should signup a user successfully', async () => {
+  it('Should signup a user successfully', async () => {
     const res = await request(app)
       .post('/api/auth/signup')
       .send({
@@ -22,7 +22,7 @@ describe('Auth End-to-End Tests', () => {
     expect(res.body).toHaveProperty('token');
   });
 
-  it('should login a user successfully', async () => {
+  it('Should login a user successfully', async () => {
     await request(app)
       .post('/api/auth/signup')
       .send({
@@ -42,7 +42,7 @@ describe('Auth End-to-End Tests', () => {
     expect(res.body).toHaveProperty('token');
   });
 
-  it('should return 400 for invalid login', async () => {
+  it('Should return 400 for invalid login', async () => {
     const res = await request(app)
       .post('/api/auth/login')
       .send({
