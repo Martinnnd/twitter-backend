@@ -6,7 +6,7 @@ const swaggerOptions = {
     info: {
       title: 'API Documentation',
       version: '1.0.0',
-      description: 'This is the API documentation for our project.',
+      description: 'This is the API documentation for our project',
     },
   },
   apis: [
