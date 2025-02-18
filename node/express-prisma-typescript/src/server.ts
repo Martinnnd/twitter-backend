@@ -23,7 +23,6 @@ app.use(express.json()) // Parses application/json payloads request bodies
 app.use(express.urlencoded({ extended: false })) // Parse application/x-www-form-urlencoded request bodies
 app.use(cookieParser()) // Parse cookies
 
-// Set up CORS
 app.use(
   cors({
     origin: Constants.CORS_WHITELIST
