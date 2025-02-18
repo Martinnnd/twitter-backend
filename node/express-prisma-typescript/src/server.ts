@@ -3,15 +3,16 @@ import morgan from 'morgan'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import swaggerUi from 'swagger-ui-express'
-import { swaggerDocs } from '@swagger'
+import { swaggerDocs } from './swagger'
 import { Constants, NodeEnv, Logger } from '@utils'
-import { router } from '@router'
+import { router } from './router'
 import { ErrorHandling } from '@utils/errors'
 import { createServer } from 'http'
 import './utils/socket'
 
 export const app = express()
 export const server = createServer(app)
+
 
 // Set up request logger
 if (Constants.NODE_ENV === NodeEnv.DEV) {

@@ -210,9 +210,13 @@ postRouter.post('/', BodyValidation(CreatePostInputDTO), async (req: Request, re
  *         description: Bad request, missing or invalid filetype
  */
 postRouter.get('/image/presignedUrl', async (req: Request, res: Response) => {
-  const { filetype } = req.query as Record<string, string>
+  const filetype = req.query.filetype as string;
 
   const data = await service.setPostImage(filetype)
+
+  if (!filetype) {
+    return res.status(HttpStatus.BAD_REQUEST).json({ error: "Missing filetype query parameter" });
+  }
   
   if(data !== null) {
     return res.status(HttpStatus.OK).json(data)
