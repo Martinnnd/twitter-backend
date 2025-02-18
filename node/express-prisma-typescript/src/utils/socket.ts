@@ -28,7 +28,7 @@ io.use((socket: AuthenticatedSocket, next) => {
   const token = socket.handshake.query.token as string;
 
   if (!token) {
-    Logger.warn('Socket connection rejected: No token provided');
+    Logger.warn('Socket connection rejected: No token provided.');
     return next(new Error('INVALID_TOKEN'));
   }
 
