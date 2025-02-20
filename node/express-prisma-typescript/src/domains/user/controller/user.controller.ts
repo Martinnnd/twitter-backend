@@ -154,6 +154,41 @@ userRouter.get('/by_username/:username', async (req: Request, res: Response) => 
 
 /**
  * @swagger
+ * /api/user/private/:is_private:
+ *   post:
+ *     security:
+ *       - bearer: []
+ *     summary: Set user private
+ *     tags: [User]
+ *     parameters:
+ *       - in: path
+ *         name: is_private
+ *         schema:
+ *           type: boolean
+ *         required: true
+ *         description: Set user private
+ *     responses:
+ *       200:
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 private:
+ *                   type: boolean
+ *                   description: Privacy status
+ */
+userRouter.post('/private/:turnPrivate', async (req: Request, res: Response) => {
+  const { userId } = res.locals.context
+  const { turnPrivate } = req.params
+
+  const setted = await service.setPrivate(userId, turnPrivate)
+  return res.status(HttpStatus.OK).send({ private: setted })
+})
+
+/**
+ * @swagger
  * /api/user:
  *   delete:
  *     security:

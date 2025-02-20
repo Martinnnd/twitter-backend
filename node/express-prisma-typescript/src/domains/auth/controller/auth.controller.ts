@@ -75,3 +75,39 @@ authRouter.post('/login', BodyValidation(LoginInputDTO), async (req: Request, re
 
   return res.status(HttpStatus.OK).json(token)
 })
+
+/**
+ * @swagger
+ * /api/auth/validateToken:
+ *   post:
+ *     summary: Validate token
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: The token to validate
+ *     responses:
+ *       200:
+ *         description: Token is valid
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 validToken:
+ *                   type: boolean
+ *                   description: Indicates if the token is valid
+ */
+authRouter.post('/validateToken', async (req: Request, res: Response) => {
+  const { token } = req.body
+
+  const validToken = service.validateToken(token)
+
+  return res.status(HttpStatus.OK).json(validToken)
+})

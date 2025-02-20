@@ -2,12 +2,13 @@ import { UserRepository } from '@domains/user/repository'
 import {
   checkPassword,
   ConflictException,
+  Constants,
   encryptPassword,
   generateAccessToken,
   NotFoundException,
   UnauthorizedException
 } from '@utils'
-
+import jwt from 'jsonwebtoken'
 import { LoginInputDTO, SignupInputDTO, TokenDTO } from '../dto'
 import { AuthService } from './auth.service'
 
@@ -16,7 +17,7 @@ export class AuthServiceImpl implements AuthService {
 
   async signup (data: SignupInputDTO): Promise<{ userId: string, token:string }> {
     const existingUser = await this.repository.getByEmailOrUsername(data.email, data.username)
-    if (existingUser) throw new ConflictException('USER_ALREADY_EXISTS')
+    if (existingUser) throw new ConflictException('User already exists')
 
     const encryptedPassword = await encryptPassword(data.password)
 
@@ -32,10 +33,19 @@ export class AuthServiceImpl implements AuthService {
 
     const isCorrectPassword = await checkPassword(data.password, user.password)
 
-    if (!isCorrectPassword) throw new UnauthorizedException('INCORRECT_PASSWORD')
+    if (!isCorrectPassword) throw new UnauthorizedException('Invalid credentials')
 
     const token = generateAccessToken({ userId: user.id })
 
     return { userId: user.id, token }
+  }
+
+  validateToken (token: string): { validToken: boolean } {
+    try {
+      jwt.verify(token, Constants.TOKEN_SECRET)
+      return { validToken: true }
+    } catch (error) {
+      return { validToken: false }
+    }
   }
 }

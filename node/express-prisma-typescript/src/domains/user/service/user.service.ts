@@ -10,4 +10,5 @@ export interface UserService {
   setProfilePicture (userId: string, filetype: string): Promise<{ presignedUrl: string, profilePictureUrl: string}>
   getProfilePicture (userId: string): Promise<string | null>
   getSelfUser( userId: string): Promise<UserViewDTO>
+  setPrivate (userId: string, isPrivate: string): Promise<boolean>
 }

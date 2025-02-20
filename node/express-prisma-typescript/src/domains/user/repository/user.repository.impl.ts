@@ -142,7 +142,17 @@ export class UserRepositoryImpl implements UserRepository {
     return user?.profilePicture ?? null
   }
 
+  async setPrivate (userId: string, isPrivate: boolean): Promise<boolean> {
+    const user = await this.db.user.update({
+      where: {
+        id: userId
+      },
+      data: {
+        isPrivate
+      }
+    })
 
-
+    return user.isPrivate
+  }
 
 }

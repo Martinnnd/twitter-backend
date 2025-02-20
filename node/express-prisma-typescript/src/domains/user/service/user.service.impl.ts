@@ -6,6 +6,7 @@ import { UserService } from './user.service';
 import { Constants } from '@utils/constants';
 import { generateS3UploadUrl } from '@utils/aws';
 import { FollowerRepository } from '@domains/follower/repository';
+import { ValidationException } from '@utils/errors';
 
 export class UserServiceImpl implements UserService {
   constructor(private readonly repository: UserRepository, private readonly followerRepository: FollowerRepository) {}
@@ -63,6 +64,13 @@ export class UserServiceImpl implements UserService {
     if (!user) throw new NotFoundException('user')
     const selfView = new UserViewDTO(user)
     return selfView
+  }
+
+  async setPrivate (userId: string, isPrivate: string): Promise<boolean> {
+    if (isPrivate !== 'true' && isPrivate !== 'false') throw new ValidationException([{ message: 'The parameter must be true or false' }])
+    let set: boolean
+    isPrivate === 'true' ? (set = true) : (set = false)
+    return await this.repository.setPrivate(userId, set)
   }
 
   async deleteUser(userId: any): Promise<void> {
