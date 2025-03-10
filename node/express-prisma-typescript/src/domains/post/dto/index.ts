@@ -1,15 +1,16 @@
-import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator'
+import { IsString, IsNotEmpty, MaxLength, IsOptional, ArrayMaxSize, IsArray } from 'class-validator'
 import { ExtendedUserDTO } from '@domains/user/dto'
 
 export class CreatePostInputDTO {
   @IsString()
   @IsNotEmpty()
   @MaxLength(240)
-    content!: string
+  content!: string;
 
   @IsOptional()
-  @MaxLength(4)
-    images?: string[]
+  @IsArray() 
+  @ArrayMaxSize(4) 
+  images?: string[];
 }
 
 export class PostDTO {
