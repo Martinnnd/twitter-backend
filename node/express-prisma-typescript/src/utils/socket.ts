@@ -19,7 +19,7 @@ const messageService = new MessageServiceImpl(
 
 export const io = new Server(server, {
   cors: {
-    origin: '*', // Especificar dominio permitido
+    origin: 'http://localhost:3000', // Especificar dominio permitido
     methods: ['GET', 'POST'],
   },
 });
@@ -27,6 +27,7 @@ export const io = new Server(server, {
 // Middleware para autenticar usuarios con token
 io.use((socket: AuthenticatedSocket, next) => {
   const token = socket.handshake.query.token as string;
+  console.log("🔍 Token recibido:", token);
 
   if (!token) {
     Logger.warn('Socket connection rejected: No token provided.');

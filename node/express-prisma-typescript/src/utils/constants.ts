@@ -24,7 +24,9 @@ export class Constants {
   static PORT: string = process.env.PORT ?? '8080'
 
   // CORS urls to allow
-  static CORS_WHITELIST: string = process.env.CORS_WHITELIST ?? '*'
+  static CORS_WHITELIST: string[] = process.env.CORS_WHITELIST
+  ? process.env.CORS_WHITELIST.split(',').map(url => url.trim()) 
+  : ['http://localhost:3000']
 
   // Authentication secret
   static TOKEN_SECRET: string = process.env.TOKEN_SECRET ?? 'secret'

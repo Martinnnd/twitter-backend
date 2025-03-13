@@ -25,9 +25,11 @@ app.use(cookieParser()) // Parse cookies
 
 app.use(
   cors({
-    origin: Constants.CORS_WHITELIST
+    origin: Constants.CORS_WHITELIST,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
   })
-)
+);
 
 app.use('/api', router)
 
