@@ -46,4 +46,19 @@ export class MessageServiceImpl implements MessageService {
     if (!receiver) throw new NotFoundException('User not found');
     return await this.repository.getChat(userId, otherUserId);
   }
+
+  async canSendMessage(senderId: string, receiverId: string): Promise<boolean> {
+    if (senderId === receiverId) {
+      return false;
+    }
+
+    const [sender, receiver, follows] = await Promise.all([
+      this.userRepository.getById(senderId),
+      this.userRepository.getById(receiverId),
+      this.followerRepository.getByIds(senderId, receiverId)
+    ]);
+
+    if (!sender || !receiver) return false;
+    return !!follows;
+  }
 }

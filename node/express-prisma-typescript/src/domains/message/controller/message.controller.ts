@@ -50,3 +50,15 @@ messageRouter.get('/conversations', async (req: Request, res: Response) => {
     return res.status(HttpStatus.BAD_REQUEST).json({ error: (error as Error).message });
   }
 });
+
+messageRouter.get('/can-send/:receiverId', async (req: Request, res: Response) => {
+  const { userId } = res.locals.context;
+  const { receiverId } = req.params;
+
+  try {
+    const canSend = await service.canSendMessage(userId, receiverId);
+    return res.status(HttpStatus.OK).json({ canSend });
+  } catch (error) {
+    return res.status(HttpStatus.BAD_REQUEST).json({ error: (error as Error).message });
+  }
+});

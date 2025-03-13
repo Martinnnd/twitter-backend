@@ -6,6 +6,7 @@ import { db, BodyValidation, isValidReactionType } from '@utils'
 import { ReactionRepositoryImpl } from '../repository'
 import { ReactionService, ReactionServiceImpl } from '../service'
 import { PostRepositoryImpl } from '@domains/post/repository'
+import { ReactionType } from '@prisma/client'
 
 export const reactionRouter = Router()
 
@@ -39,14 +40,21 @@ const service: ReactionService = new ReactionServiceImpl(new ReactionRepositoryI
  *         description: Invalid request body
  */
 reactionRouter.post('/:postId', isValidReactionType, async (req: Request, res: Response) => {
-  const { userId } = res.locals.context
-  const { postId } = req.params
-  const type: any = req.query.type
+  const { userId } = res.locals.context;
+  const { postId } = req.params;
+  const type = req.body.type as ReactionType;
 
-  const reaction = await service.createReaction(userId, postId, type)
+  console.log("Reacción recibida:", type); // Verifica que el tipo sea LIKE o RETWEET
 
-  return res.status(HttpStatus.CREATED).json(reaction)
-})
+  if (!type || !Object.values(ReactionType).includes(type as ReactionType)) {
+    return res.status(HttpStatus.BAD_REQUEST).json({ message: "Tipo de reacción inválido" });
+  }
+
+  const reaction = await service.createReaction(userId, postId, type as ReactionType);
+
+  return res.status(HttpStatus.CREATED).json(reaction);
+});
+
 
 /**
  * @swagger

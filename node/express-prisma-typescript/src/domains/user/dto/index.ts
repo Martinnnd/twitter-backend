@@ -19,6 +19,7 @@ export class ExtendedUserDTO extends UserDTO {
     super(user)
     this.email = user.email
     this.name = user.name
+    this.username = user.username
     this.password = user.password
     this.isPrivate = user.isPrivate
   }

@@ -34,21 +34,34 @@ const service: FollowerService = new FollowerServiceImpl(new FollowerRepositoryI
  *         description: User not found or already following
  */
 followerRouter.post('/follow/:userId', async (req: Request, res: Response) => {
-  const { userId } = res.locals.context;
-  const { userId: targetUserId } = req.params;
+  try {
+    const { userId } = res.locals.context;
+    const { userId: targetUserId } = req.params;
 
-  if (!targetUserId) {
-    return res.status(HttpStatus.NOT_FOUND).json({ message: 'User not found' });
+    console.log("👤 Usuario autenticado:", userId);
+    console.log("🎯 Usuario a seguir:", targetUserId);
+
+    if (!userId) {
+      return res.status(HttpStatus.UNAUTHORIZED).json({ message: 'Unauthorized' });
+    }
+
+    if (!targetUserId) {
+      return res.status(HttpStatus.NOT_FOUND).json({ message: 'User not found' });
+    }
+
+    const result = await service.followUser(userId, targetUserId);
+
+    if (!result) {
+      return res.status(HttpStatus.BAD_REQUEST).json({ message: 'User not found or already following' });
+    }
+
+    return res.status(HttpStatus.OK).json({ message: 'Followed successfully' });
+  } catch (error) {
+    console.error("❌ Error en followUser:", error);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
   }
-
-  const result = await service.followUser(userId, targetUserId);
-
-  if (!result) {
-    return res.status(HttpStatus.NOT_FOUND).json({ message: 'User not found or already following' });
-  }
-
-  return res.status(HttpStatus.OK).json({ message: 'Followed successfully' });
 });
+
 
 /**
  * @swagger

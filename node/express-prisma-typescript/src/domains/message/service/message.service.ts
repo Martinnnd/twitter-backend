@@ -5,4 +5,5 @@ export interface MessageService {
   sendMessage(senderId: string, receiverId: string, content: string): Promise<MessageDto>
   getAllChats(userId: string): Promise<UserViewDTO[]>
   getConversation(userId: string, otherUserId: string): Promise<MessageDto[]>
+  canSendMessage(senderId: string, receiverId: string): Promise<boolean>
 }
