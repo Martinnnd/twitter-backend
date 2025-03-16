@@ -45,11 +45,11 @@ export class UserServiceImpl implements UserService {
     return users.map((user) => new UserViewDTO(user));
   }
 
-  async setProfilePicture (userId: string, filetype: string): Promise<{ presignedUrl: string, profilePictureUrl: string}> {
+  async setProfilePicture (userId: string, fileUrl: string): Promise<{ presignedUrl: string, profilePictureUrl: string}> {
     const user = await this.repository.getById(userId)
     if (!user) throw new NotFoundException('user')
-    const data = await generateS3UploadUrl(filetype)
-    const url = `https://${Constants.BUCKET_NAME}.s3.amazonaws.com/${data.filename}.jpeg`
+    const data = await generateS3UploadUrl(fileUrl)
+    const url = `https://${Constants.BUCKET_NAME}.s3.amazonaws.com/${data.fileUrl}.jpeg`
     await this.repository.setProfilePicture(userId, url)
     return { presignedUrl: data.presignedUrl, profilePictureUrl: url }
   }

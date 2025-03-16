@@ -209,19 +209,19 @@ postRouter.post('/', BodyValidation(CreatePostInputDTO), async (req: Request, re
  *       400:
  *         description: Bad request, missing or invalid filetype
  */
-postRouter.get('/image/presignedUrl', async (req: Request, res: Response) => {
-  const filetype = req.query.filetype as string;
-
-  const data = await service.setPostImage(filetype)
+postRouter.post('/image/presignedUrl', async (req: Request, res: Response) => {
+  const filetype = req.body.fileType as string; // Cambiado de req.query a req.body
 
   if (!filetype) {
-    return res.status(HttpStatus.BAD_REQUEST).json({ error: "Missing filetype query parameter" });
+    return res.status(HttpStatus.BAD_REQUEST).json({ error: "Missing filetype parameter" });
   }
-  
-  if(data !== null) {
-    return res.status(HttpStatus.OK).json(data)
+
+  const data = await service.setPostImage(filetype);
+
+  if (data !== null) {
+    return res.status(HttpStatus.OK).json(data);
   }
-})
+});
 
 /**
  * @swagger

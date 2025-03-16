@@ -26,8 +26,8 @@ export const io = new Server(server, {
 
 // Middleware para autenticar usuarios con token
 io.use((socket: AuthenticatedSocket, next) => {
-  const token = socket.handshake.query.token as string;
-  console.log("🔍 Token recibido:", token);
+  const token = socket.handshake.auth?.token as string || socket.handshake.query?.token as string;
+console.log("🔍 Token recibido:", token);
 
   if (!token) {
     Logger.warn('Socket connection rejected: No token provided.');
