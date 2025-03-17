@@ -51,14 +51,22 @@ const service: PostService = new PostServiceImpl(new PostRepositoryImpl(db), new
  *               items:
  *                 $ref: '#/components/schemas/ExtendedPostDTO'
  */
-postRouter.get('/', async (req: Request, res: Response) => {
-  const { userId } = res.locals.context
-  const { limit, before, after } = req.query as Record<string, string>
+postRouter.get("/", async (req: Request, res: Response) => {
+  const { userId } = res.locals.context;
+  const { limit, after } = req.query as Record<string, string>;
 
-  const posts = await service.getLatestPosts(userId, { limit: Number(limit), before, after })
+  console.log("📢 Query Params:", { limit, after });
 
-  return res.status(HttpStatus.OK).json(posts)
-})
+  // Llamamos al servicio con paginación
+  const posts = await service.getLatestPosts(userId, { limit: Number(limit), after });
+
+  // Definimos nextCursor si hay más posts por cargar
+  const nextCursor = posts.length === Number(limit) ? posts[posts.length - 1].id : null;
+
+  console.log("📢 Returning nextCursor:", nextCursor);
+
+  return res.status(200).json({ data: posts, nextCursor });
+});
 
 /**
  * @swagger
@@ -92,7 +100,10 @@ postRouter.get('/:postId', async (req: Request, res: Response) => {
   const post = await service.getPost(userId, postId)
   const author = await db.user.findUnique({
     where: { id : post.authorId },
-    select: { isPrivate: true, followers: { where: { followerId: userId } } },
+    select: { isPrivate: true, 
+      followers: { where: { followerId: userId } },
+      reactions: { where: { postId: postId } }
+    },
   })
 
   if (author?.isPrivate && author.followers.length === 0) {

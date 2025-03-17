@@ -38,8 +38,10 @@ export class ExtendedPostDTO extends PostDTO {
     this.qtyComments = post.qtyComments
     this.qtyLikes = post.qtyLikes
     this.qtyRetweets = post.qtyRetweets
+    this.reactions = post.reactions
   }
 
+  reactions!: any[]
   author!: ExtendedUserDTO
   qtyComments!: number
   qtyLikes!: number
