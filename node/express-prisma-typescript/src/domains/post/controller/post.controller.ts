@@ -157,6 +157,16 @@ postRouter.get('/by_user/:userId', async (req: Request, res: Response) => {
   return res.status(HttpStatus.OK).json(posts)
 })
 
+postRouter.get('/following', async (req: Request, res: Response) => {
+  const { userId } = res.locals.context
+  
+  const { limit, before, after } = req.query as Record<string, string>
+
+  const posts = await service.getLatestPostsFollowing(userId, { limit: Number(limit), before, after })
+  
+  return res.status(HttpStatus.OK).json(posts)
+})
+
 /**
  * @swagger
  * /api/post:
@@ -233,6 +243,7 @@ postRouter.post('/image/presignedUrl', async (req: Request, res: Response) => {
     return res.status(HttpStatus.OK).json(data);
   }
 });
+
 
 /**
  * @swagger

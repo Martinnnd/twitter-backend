@@ -75,6 +75,8 @@ export class PostRepositoryImpl implements PostRepository {
     return posts.map((post) => new ExtendedPostDTO(post))
   }
 
+  
+
   async addQtyLikes(postId: string): Promise<void> {
     await this.db.post.update({
       where: {
